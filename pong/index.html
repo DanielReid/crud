@@ -4,6 +4,7 @@
 <head>
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
+  <meta name="viewport" content="width=device-width,user-scalable=no">
 </head>
 
 <body>
@@ -29,16 +30,10 @@
   window.onload = function() {
     canvas = document.getElementById('gameCanvas');
     canvasContext = canvas.getContext('2d');
-    canvas.addEventListener('mousedown', function() {
-      if (showingWinScreen) {
-        p1Score = p2Score = 0;
-        showingWinScreen = false;
-      }
-    });
-    canvas.addEventListener('mousemove', function(evt) {
-      var mousePos = calcMousePos(evt);
-      paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
-    });
+    canvas.addEventListener('mousedown', resetGame);
+    canvas.addEventListener('touchstart', resetGame);
+    canvas.addEventListener('mousemove', movePaddle);
+    canvas.addEventListener('touchmove', movePaddle);
     canvasContext.textAlign = 'center';
     ballReset();
     setInterval(function() {
@@ -47,14 +42,41 @@
     }, 1000 / fps);
   };
 
+  function resetGame() {
+    if (showingWinScreen) {
+      p1Score = p2Score = 0;
+      showingWinScreen = false;
+    }
+  }
+
+  function movePaddle(evt) {
+    evt.preventDefault();
+    var mousePos = calcMousePos(evt);
+    paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
+  }
+
+  function calcMousePos(evt) {
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+
+    var clientX = evt.clientX ? evt.clientX : evt.targetTouches[0].clientX;
+    var clientY = evt.clientY ? evt.clientY : evt.targetTouches[0].clientY;
+    var mouseX = clientX - rect.left - root.scrollLeft;
+    var mouseY = clientY - rect.top - root.scrollTop;
+    return {
+      x: mouseX,
+      y: mouseY
+    };
+  }
+
   function ballReset() {
     if (p1Score >= MAX_SCORE || p2Score >= MAX_SCORE) {
       showingWinScreen = true;
     }
     ballX = 75;
-    ballY = 75;
+    ballY = canvas.height / 2;
     ballVX = 4;
-    ballVY = -2;
+    ballVY = (Math.random() - 0.5) * 8;
   }
 
   function moveComputerPaddle() {
@@ -110,18 +132,6 @@
   function colorText(color, text, x, y) {
     canvasContext.fillStyle = color;
     canvasContext.fillText(text, x, y);
-  }
-
-  function calcMousePos(evt) {
-    var rect = canvas.getBoundingClientRect();
-    var root = document.documentElement;
-
-    var mouseX = evt.clientX - rect.left - root.scrollLeft;
-    var mouseY = evt.clientY - rect.top - root.scrollTop;
-    return {
-      x: mouseX,
-      y: mouseY
-    };
   }
 
   function drawScores() {
