@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+</head>
+
+<body>
+  <script>
+  'use strict';
+  var canvas;
+  var canvasContext;
+  var ballX;
+  var ballY;
+  var ballVX;
+  var ballVY;
+  var paddle1Y = 250;
+  var paddle2Y = 250;
+  var p1Score = 0;
+  var p2Score = 0;
+  var PADDLE_HEIGHT = 100;
+  var PADDLE_THICKNESS = 10;
+  var COMPUTER_MAX_SPEED = 4;
+  var MAX_SCORE = 3;
+  var fps = 60;
+  var showingWinScreen = false;
+
+  window.onload = function() {
+    canvas = document.getElementById('gameCanvas');
+    canvasContext = canvas.getContext('2d');
+    canvas.addEventListener('mousedown', function() {
+      if (showingWinScreen) {
+        p1Score = p2Score = 0;
+        showingWinScreen = false;
+      }
+    });
+    canvas.addEventListener('mousemove', function(evt) {
+      var mousePos = calcMousePos(evt);
+      paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
+    });
+    canvasContext.textAlign = 'center';
+    ballReset();
+    setInterval(function() {
+      moveStuff();
+      drawStuff();
+    }, 1000 / fps);
+  };
+
+  function ballReset() {
+    if (p1Score >= MAX_SCORE || p2Score >= MAX_SCORE) {
+      showingWinScreen = true;
+    }
+    ballX = 75;
+    ballY = 75;
+    ballVX = 4;
+    ballVY = -2;
+  }
+
+  function moveComputerPaddle() {
+    if (paddle2Y + PADDLE_HEIGHT / 4 > ballY) {
+      paddle2Y -= COMPUTER_MAX_SPEED;
+    } else if (paddle2Y + PADDLE_HEIGHT * 0.75 < ballY) {
+      paddle2Y += COMPUTER_MAX_SPEED;
+    }
+  }
+
+  function moveStuff() {
+    if (showingWinScreen) return;
+    moveComputerPaddle();
+    if (ballX > canvas.width) {
+      if (ballY < paddle2Y || ballY > paddle2Y + PADDLE_HEIGHT) {
+        ++p1Score;
+        ballReset();
+      } else {
+        ballVX *= -1;
+        var paddle2Mid = paddle2Y + PADDLE_HEIGHT / 2;
+        ballVY = (ballY - paddle2Mid) / 5;
+      }
+    }
+    if (ballY < 0 || ballY > canvas.height) {
+      ballVY *= -1;
+    }
+    if (ballX < 0) {
+      if (ballY < paddle1Y || ballY > paddle1Y + PADDLE_HEIGHT) {
+        ++p2Score;
+        ballReset();
+      } else {
+        ballVX *= -1;
+        var paddle1Mid = paddle1Y + PADDLE_HEIGHT / 2;
+        ballVY = (ballY - paddle1Mid) / 5;
+      }
+    }
+    ballX += ballVX;
+    ballY += ballVY;
+  }
+
+  function colorRect(color, topLeftX, topLeftY, width, height) {
+    canvasContext.fillStyle = color;
+    canvasContext.fillRect(topLeftX, topLeftY, width, height);
+  }
+
+  function colorCircle(color, x, y, R) {
+    canvasContext.fillStyle = color;
+    canvasContext.beginPath();
+    canvasContext.arc(x, y, R, 0, Math.PI * 2, true);
+    canvasContext.fill();
+  }
+
+  function colorText(color, text, x, y) {
+    canvasContext.fillStyle = color;
+    canvasContext.fillText(text, x, y);
+  }
+
+  function calcMousePos(evt) {
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+
+    var mouseX = evt.clientX - rect.left - root.scrollLeft;
+    var mouseY = evt.clientY - rect.top - root.scrollTop;
+    return {
+      x: mouseX,
+      y: mouseY
+    };
+  }
+
+  function drawScores() {
+    colorText('white', 'score ' + p1Score, 100, 100);
+    colorText('white', 'score ' + p2Score, 700, 100);
+  }
+
+  function drawNet() {
+    canvasContext.strokeStyle = 'white';
+    canvasContext.setLineDash([10, 10]);
+    canvasContext.beginPath();
+    canvasContext.moveTo(canvas.width / 2, 0);
+    canvasContext.lineTo(canvas.width / 2, canvas.height);
+    canvasContext.stroke();
+  }
+
+  function drawStuff() {
+    colorRect('black', 0, 0, canvas.width, canvas.height);
+    if (showingWinScreen) {
+      colorText('white', 'Player ' + (p1Score > p2Score ? 1 : 2) + ' wins!', canvas.width / 2, canvas.height / 2);
+      colorText('white', 'Click to continue', canvas.width / 2, canvas.height - 100);
+    } else {
+      drawNet();
+      colorRect('white', 0, paddle1Y, PADDLE_THICKNESS, PADDLE_HEIGHT);
+      colorRect('white', canvas.width - PADDLE_THICKNESS, paddle2Y, canvas.width, PADDLE_HEIGHT);
+      colorCircle('white', ballX, ballY, 10);
+
+    }
+    drawScores();
+  }
+  </script>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+</body>
+
+</html>
