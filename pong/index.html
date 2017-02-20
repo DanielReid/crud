@@ -29,6 +29,8 @@
 
   window.onload = function() {
     canvas = document.getElementById('gameCanvas');
+    canvas.width = window.innerWidth - 10;
+    canvas.height = window.innerHeight - 10;
     canvasContext = canvas.getContext('2d');
     canvas.addEventListener('mousedown', resetGame);
     canvas.addEventListener('touchstart', resetGame);
@@ -136,7 +138,7 @@
 
   function drawScores() {
     colorText('white', 'score ' + p1Score, 100, 100);
-    colorText('white', 'score ' + p2Score, 700, 100);
+    colorText('white', 'score ' + p2Score, canvas.width - 100, 100);
   }
 
   function drawNet() {
@@ -163,7 +165,7 @@
     drawScores();
   }
   </script>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <canvas id="gameCanvas"></canvas>
 </body>
 
 </html>
