@@ -19,7 +19,7 @@
   var fps = 60;
   var PADDLE_SIZE = 100;
   var PADDLE_Y;
-  var MAX_VX = 16;
+  var MAX_VX;
   var VY;
   var paddleX;
   var BRICK_SETTINGS;
@@ -29,7 +29,10 @@
     canvas.width = window.innerWidth * 0.95;
     canvas.height = window.innerHeight * 0.95;
     PADDLE_Y = canvas.height * 0.9;
-    VY = canvas.height / 120;
+    paddleX = (canvas.width -PADDLE_SIZE) * 0.5;
+
+    VY = canvas.height / 150;
+    MAX_VX = VY * 3;
     BRICK_SETTINGS = {
       width: canvas.width * 0.1,
       height: canvas.height * 0.035,
